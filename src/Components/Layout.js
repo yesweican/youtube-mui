@@ -1,0 +1,298 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Box, Drawer, IconButton, CssBaseline, AppBar, Toolbar, Button, InputAdornment,Typography, Container } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Menu as MenuIcon, Home as HomeIcon, LibraryBooks, VideoLibrary, PostAdd, MovieCreation, Settings as  SettingsIcon, AccountCircle as ProfileIcon, Group as GroupIcon} from '@mui/icons-material';
+import SearchIcon from '@mui/icons-material/Search';
+import { useNavigate } from 'react-router-dom';
+import { AUTH_API_END_POINT } from '../config/constants.js'
+
+// Import your content components
+import Home from './Home';
+import Component1 from './Component1';
+import Component2 from './Component2';
+import NewArticle from './NewArticle.js';
+import NewVideo from './NewVideo.js';
+import NewComment from './NewComment.js';
+import Profile from './Profile.js';
+import Groups from './Groups.js';
+import Settings from './Settings.js';
+import RegistrationPage from './RegistrationPage';
+const drawerWidthExpanded = 240;
+const drawerWidthCollapsed = 120;
+const mainLeftMargin = 20;
+
+function Layout() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogInDialog, setShowLogInDialog] = useState(false);
+  const [loginUser, setLoginUser] = useState({
+    username: '',
+    password: ''});
+  const navigate = useNavigate();
+
+  const toggleDrawer = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  const clickLogIn = () => {
+    setShowLogInDialog(true);
+    console.log("try to log in");
+  };
+
+  const clickLogOut = () => {
+    setIsLoggedIn(false);
+  };
+
+  const clickRegister = () => {
+    navigate('/register');
+  };  
+
+  const handleLogInChange = (e) => {
+    setLoginUser((prevUser)=>({ ...prevUser, [e.target.name]: e.target.value }));
+  };
+
+  const handleLogInClose = () => setShowLogInDialog(false);
+  const handleLogInSubmit = async (e) => {
+    // Prevents the page from refreshing
+    e.preventDefault(); 
+    // Handle login logic here
+    try {
+      const response = await axios.post(AUTH_API_END_POINT+'/login', loginUser);
+
+      ///only do this if successfully logged in
+      setIsLoggedIn(true);
+      // Extract tokens from the response
+      const { user, accessToken, refreshToken } = response.data;
+
+      // Save tokens to localStorage
+      localStorage.setItem('currentUser', user);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+
+      console.log(`Login successful! Welcome, ${response.data.user.username}`);
+    } catch (error) {
+      console.log(`Login failed: ${error.response?.data?.message || error.message}`);
+    } 
+    console.log("Username:", loginUser.username, "Password:", loginUser.password);
+
+    setShowLogInDialog(false);
+  };
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+
+       {/* Cross-Section Header */}
+       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant="h6" noWrap component="div">
+            App Header
+          </Typography>
+          {/* Search Bar */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <TextField
+              placeholder="Search..."
+              variant="outlined"
+              size="small"
+              sx={{
+                width:'320px',
+                backgroundColor: 'white', // White background
+                borderRadius: 1, // Rounded corners
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'lightgray', // Light gray border
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'gray', // Darker gray on hover
+                  },
+                },
+              }}
+              slotProps={{
+                textFieldRoot: {
+                  startAdornment: (
+                    <SearchIcon sx={{ color: 'action.active', mr: 1 }} />
+                  ),
+                },
+              }}
+            />
+            <Button variant="contained" color="primary">
+              Search
+            </Button>
+          </Box>
+          <Box>
+            {isLoggedIn === false && <Button color="inherit" onClick={clickLogIn}>LogIn</Button>}  
+            {isLoggedIn === false && <Button color="inherit" onClick={clickRegister}>CreateAccount</Button>}
+            {isLoggedIn === true && <Button color="inherit">Profile</Button>}  
+            {isLoggedIn === true && <Button color="inherit" onClick={clickLogOut}>LogOut</Button>}              
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+
+      {/* Sidebar Drawer */}
+      <Drawer
+        variant="permanent"
+        open={!isCollapsed}
+        sx={
+          {
+          width: `${isCollapsed ? drawerWidthCollapsed : drawerWidthExpanded}px`,
+          '& .MuiDrawer-paper': {
+            width: `${isCollapsed ? drawerWidthCollapsed : drawerWidthExpanded}px`,
+            boxSizing: 'border-box',
+            transition: 'width 0.3s ease',           
+          },
+        }}
+      >
+        <Toolbar /> {/* Spacer to offset the header */}
+        <Box sx={{ overflow: 'auto', p: 2 }}>
+          <Toolbar>
+            <IconButton onClick={toggleDrawer}>
+              <MenuIcon />
+            </IconButton>
+          </Toolbar>
+          
+          {/* Sidebar Menu Items */}
+          <Box sx={{ padding: 2 }}>
+            <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer', mb: 1 }}
+            >
+              <Link to="/Home" className="text-left p-2 hover:bg-gray-700 rounded-md">
+              <div>
+              <HomeIcon />Home
+              </div>
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer', mb: 1 }}
+          >
+              <Link to="/component1" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <LibraryBooks /> Menu 1
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/component2" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <VideoLibrary /> Menu 2
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/newarticle" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <PostAdd />New Article
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/newvideo" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <MovieCreation />New Video
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/groups" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <GroupIcon />Groups
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/profile" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <ProfileIcon />Profile
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/settings" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <SettingsIcon /> Settings
+              </Link>
+          </Typography>        
+          </Box>
+        </Box>
+
+
+      </Drawer>
+
+      {/* Main Content with Conditional Rendering */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 1,          
+          marginLeft: `${mainLeftMargin}px`,
+          transition: 'margin-left 0.3s ease',          
+        }}
+      >
+          <Toolbar /> {/* Spacer to offset the header */}
+          <Container maxWidth="lg">
+            <Routes>
+              {/* Default route that redirects to /component1 */}
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/component1" element={<Component1 />} />
+              <Route path="/component2" element={<Component2 />} />
+              <Route path="/newarticle" element={<NewArticle />} />
+              <Route path="/newvideo" element={<NewVideo />} />
+              <Route path="/newcomment" element={<NewComment />} />                          
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/groups" element={<Groups />} />              
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/register" element={<RegistrationPage />} />
+            </Routes>          
+          </Container>
+          <div>
+          <Dialog open={showLogInDialog} onClose={handleLogInClose}>
+            <form onSubmit={handleLogInSubmit}>
+             <DialogTitle>Login</DialogTitle>
+             <DialogContent>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Email(or Username)"
+                name="username"
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={loginUser.username}
+                onChange={handleLogInChange}
+              />
+              <TextField
+                margin="dense"
+                label="Password"
+                type="password"
+                name="password"
+                fullWidth
+                variant="outlined"
+                value={loginUser.password}
+                onChange={handleLogInChange}
+              />
+             </DialogContent>
+            
+            <DialogActions>
+              <Button onClick={handleLogInClose} color="primary">Cancel</Button>
+              <Button type="submit" color="primary">Submit</Button>
+            </DialogActions>
+            </form>
+
+          </Dialog>
+          </div> 
+      </Box>
+    </Box>
+  );
+}
+
+export default Layout;
