@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
-import { Box, Drawer, IconButton, CssBaseline, AppBar, Toolbar, Button, InputAdornment,Typography, Container } from '@mui/material';
+import { Box, Drawer, IconButton, CssBaseline, AppBar, Toolbar, Button, Typography, Container } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import { Menu as MenuIcon, Home as HomeIcon, LibraryBooks, VideoLibrary, PostAdd, MovieCreation, Settings as  SettingsIcon, AccountCircle as ProfileIcon, Group as GroupIcon} from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -19,6 +19,7 @@ import Profile from './Profile.js';
 import Groups from './Groups.js';
 import Settings from './Settings.js';
 import RegistrationPage from './RegistrationPage';
+import Error404 from './Error404.js';
 const drawerWidthExpanded = 240;
 const drawerWidthCollapsed = 120;
 const mainLeftMargin = 20;
@@ -252,6 +253,7 @@ function Layout() {
               <Route path="/groups" element={<Groups />} />              
               <Route path="/settings" element={<Settings />} />
               <Route path="/register" element={<RegistrationPage />} />
+              <Route path="*" element={<Error404 />} />
             </Routes>          
           </Container>
           <div>
