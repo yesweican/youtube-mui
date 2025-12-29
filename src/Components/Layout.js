@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { Box, Drawer, IconButton, CssBaseline, AppBar, Toolbar, Button, Typography, Container } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
-import { Menu as MenuIcon, Home as HomeIcon, LibraryBooks, VideoLibrary, PostAdd, MovieCreation, Settings as  SettingsIcon, AccountCircle as ProfileIcon, Group as GroupIcon} from '@mui/icons-material';
+import { Menu as MenuIcon, Home as HomeIcon, LibraryBooks, VideoLibrary, PostAdd, SmartDisplay, LiveTv, MovieCreation, Settings as  SettingsIcon, AccountCircle as ProfileIcon, Group as GroupIcon} from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 import { AUTH_API_END_POINT } from '../config/constants.js'
@@ -14,6 +14,8 @@ import Component1 from './Component1';
 import Component2 from './Component2';
 import NewArticle from './NewArticle.js';
 import NewVideo from './NewVideo.js';
+import NewChannel from './NewChannel.js';
+import ManageChannel from './ManageChannel.js';
 import NewComment from './NewComment.js';
 import Profile from './Profile.js';
 import Groups from './Groups.js';
@@ -202,6 +204,22 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer' }}
           >
+              <Link to="/newchannel" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <SmartDisplay />New Channel
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/managechannel" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <LiveTv />Manage Channel
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
               <Link to="/groups" className="text-left p-2 hover:bg-gray-700 rounded-md">
                 <GroupIcon />Groups
               </Link>
@@ -248,6 +266,8 @@ function Layout() {
               <Route path="/component2" element={<Component2 />} />
               <Route path="/newarticle" element={<NewArticle />} />
               <Route path="/newvideo" element={<NewVideo />} />
+              <Route path="/newchannel" element={<NewChannel />} /> 
+              <Route path="/managechannel" element={<ManageChannel />} />              
               <Route path="/newcomment" element={<NewComment />} />                          
               <Route path="/profile" element={<Profile />} />
               <Route path="/groups" element={<Groups />} />              
