@@ -1,87 +1,98 @@
-// RegistrationPage.js
-import React, { useState } from 'react';
-import axios from 'axios';
-import { TextField, Button, Box } from '@mui/material';
+import { TextField, Button, Box } from "@mui/material";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema } from "./schema";
 import { AUTH_API_END_POINT } from '../config/constants.js';
+import axios from 'axios';
 
 function RegistrationPage() {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    fullname:'',
-    password: '',
-    confirmPassword: ''
-  });
 
-  const handleChange = (e) => {
-    setFormData((prevData)=>({ ...prevData, [e.target.name]: e.target.value }));
-  };
+  const onRegister = async (data) => {
+    console.log("Form Data:", data);
 
-  const handleCreateAccount = async (e) => {
-    //alert("hello!");
-    e.preventDefault(); // Prevents the page from refreshing
-    console.log("Form Data:", formData);
     try {
-      const response = await axios.post(AUTH_API_END_POINT+'/register', formData);
+      const response = await axios.post(
+        AUTH_API_END_POINT + "/register",
+        data
+      );
+
       console.log(`Registration successful! Welcome, ${response.data.name}`);
     } catch (error) {
-      console.log(`Registration failed: ${error.response?.data?.message || error.message}`);
+      console.log(
+        `Registration failed: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    resolver: zodResolver(registerSchema)
+  });
+
   return (
-    <Box component="form" onSubmit={handleCreateAccount} 
+    <Box component="form" onSubmit={handleSubmit(onRegister)} 
       display="flex" flexDirection="column" alignItems="center" p={4}>
-      <h1>Register</h1>
+      <h1>Create New Account</h1>
       <TextField
-        label="Username"
-        name="username"
+        label="Choose Your Username"
+        fullWidth
         variant="outlined"
         sx={{width: 360}}
-        value={formData.username}
-        onChange={handleChange}
         margin="normal"
+        error={!!errors.username}
+        helperText={errors.username?.message}
+        {...register("username")}
       />
       <TextField
         label="Email"
-        name="email"
-        type="email"
+        fullWidth
         variant="outlined"
         sx={{width: 360}}
-        value={formData.email}
-        onChange={handleChange}
         margin="normal"
+        error={!!errors.email}
+        helperText={errors.email?.message}
+        {...register("email")}
       />
-      <TextField
-        label="Full Name"
-        name="fullname"
+      
+       <TextField
+        label="Enter Your Full Name"
+        fullWidth
         variant="outlined"
         sx={{width: 360}}
-        value={formData.fullname}
-        onChange={handleChange}
         margin="normal"
-      />
+        error={!!errors.fullname}
+        helperText={errors.fullname?.message}
+        {...register("fullname")}
+      />     
       <TextField
         label="Password"
-        name="password"
         type="password"
         variant="outlined"
         sx={{width: 360}}
-        value={formData.password}
-        onChange={handleChange}
         margin="normal"
+        error={!!errors.password}
+        helperText={errors.password?.message}
+        {...register("password")}
       />
+
       <TextField
         label="Confirm Password"
-        name="confirmPassword"
         type="password"
         variant="outlined"
         sx={{width: 360}}
-        value={formData.confirmPassword}
-        onChange={handleChange}
         margin="normal"
+        error={!!errors.confirmPassword}
+        helperText={errors.confirmPassword?.message}
+        {...register("confirmPassword")}
       />
-      <Button type="submit" color="primary" variant="contained" sx={{ mt: 3 }}>Submit</Button>
+      <Button type="submit" color="primary" variant="contained" sx={{ mt: 3 }}>
+        Register
+      </Button>
     </Box>
   );
 }
