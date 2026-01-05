@@ -1,7 +1,7 @@
 import { TextField, Button, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "./schema";
+import { registerSchema } from "../validation/registerSchema.js";
 import { AUTH_API_END_POINT } from '../config/constants.js';
 import axios from 'axios';
 

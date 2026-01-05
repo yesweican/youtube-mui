@@ -21,7 +21,7 @@ import Settings from './Settings.js';
 import RegistrationPage from './RegistrationPage';
 import Login from './Login';
 import Error404 from './Error404.js';
-const drawerWidthExpanded = 240;
+const drawerWidthExpanded = 260;
 const drawerWidthCollapsed = 120;
 const mainLeftMargin = 20;
 
