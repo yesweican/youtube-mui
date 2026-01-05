@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { Box, Drawer, IconButton, CssBaseline, AppBar, Toolbar, Button, Typography, Container } from '@mui/material';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import { Menu as MenuIcon, Home as HomeIcon, LibraryBooks, VideoLibrary, PostAdd, SmartDisplay, LiveTv, MovieCreation, Settings as  SettingsIcon, AccountCircle as ProfileIcon, Group as GroupIcon} from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
-import { AUTH_API_END_POINT } from '../config/constants.js'
 
 // Import your content components
 import Home from './Home';
@@ -21,6 +19,7 @@ import Profile from './Profile.js';
 import Groups from './Groups.js';
 import Settings from './Settings.js';
 import RegistrationPage from './RegistrationPage';
+import Login from './Login';
 import Error404 from './Error404.js';
 const drawerWidthExpanded = 240;
 const drawerWidthCollapsed = 120;
@@ -30,58 +29,26 @@ function Layout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogInDialog, setShowLogInDialog] = useState(false);
-  const [loginUser, setLoginUser] = useState({
-    username: '',
-    password: ''});
+
+  const clickLogIn = () => setShowLogInDialog(true);
+  const clickLogOut = () => setIsLoggedIn(false);
+
+  const handleLoginSuccess = (user) => {
+    setIsLoggedIn(true);
+    console.log(`Login successful! Welcome, ${user.username}`);
+  };
+
+
   const navigate = useNavigate();
 
   const toggleDrawer = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const clickLogIn = () => {
-    setShowLogInDialog(true);
-    console.log("try to log in");
-  };
-
-  const clickLogOut = () => {
-    setIsLoggedIn(false);
-  };
 
   const clickRegister = () => {
     navigate('/register');
   };  
-
-  const handleLogInChange = (e) => {
-    setLoginUser((prevUser)=>({ ...prevUser, [e.target.name]: e.target.value }));
-  };
-
-  const handleLogInClose = () => setShowLogInDialog(false);
-  const handleLogInSubmit = async (e) => {
-    // Prevents the page from refreshing
-    e.preventDefault(); 
-    // Handle login logic here
-    try {
-      const response = await axios.post(AUTH_API_END_POINT+'/login', loginUser);
-
-      ///only do this if successfully logged in
-      setIsLoggedIn(true);
-      // Extract tokens from the response
-      const { user, accessToken, refreshToken } = response.data;
-
-      // Save tokens to localStorage
-      localStorage.setItem('currentUser', user);
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-
-      console.log(`Login successful! Welcome, ${response.data.user.username}`);
-    } catch (error) {
-      console.log(`Login failed: ${error.response?.data?.message || error.message}`);
-    } 
-    console.log("Username:", loginUser.username, "Password:", loginUser.password);
-
-    setShowLogInDialog(false);
-  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -277,40 +244,11 @@ function Layout() {
             </Routes>          
           </Container>
           <div>
-          <Dialog open={showLogInDialog} onClose={handleLogInClose}>
-            <form onSubmit={handleLogInSubmit}>
-             <DialogTitle>Login</DialogTitle>
-             <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Email(or Username)"
-                name="username"
-                type="text"
-                fullWidth
-                variant="outlined"
-                value={loginUser.username}
-                onChange={handleLogInChange}
-              />
-              <TextField
-                margin="dense"
-                label="Password"
-                type="password"
-                name="password"
-                fullWidth
-                variant="outlined"
-                value={loginUser.password}
-                onChange={handleLogInChange}
-              />
-             </DialogContent>
-            
-            <DialogActions>
-              <Button onClick={handleLogInClose} color="primary">Cancel</Button>
-              <Button type="submit" color="primary">Submit</Button>
-            </DialogActions>
-            </form>
-
-          </Dialog>
+            <Login
+              open={showLogInDialog}
+              onClose={() => setShowLogInDialog(false)}
+              onLoginSuccess={handleLoginSuccess}
+            />
           </div> 
       </Box>
     </Box>
