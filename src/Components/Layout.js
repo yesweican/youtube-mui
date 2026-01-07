@@ -5,11 +5,13 @@ import { TextField } from '@mui/material';
 import { Menu as MenuIcon, Home as HomeIcon, LibraryBooks, VideoLibrary, PostAdd, SmartDisplay, LiveTv, MovieCreation, Settings as  SettingsIcon, AccountCircle as ProfileIcon, Group as GroupIcon} from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
+import InputAdornment from '@mui/material/InputAdornment';
 
 // Import your content components
 import Home from './Home';
 import Component1 from './Component1';
-import Component2 from './Component2';
+import VideoSearch from './VideoSearch.js';
+import VideoPopularity from './VideoPopularity.js';    
 import NewArticle from './NewArticle.js';
 import NewVideo from './NewVideo.js';
 import NewChannel from './NewChannel.js';
@@ -41,6 +43,14 @@ function Layout() {
 
   const navigate = useNavigate();
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = () => {
+    if (!searchTerm.trim()) return;
+
+    navigate(`/videosearch?q=${encodeURIComponent(searchTerm.trim())}`);
+  };
+
   const toggleDrawer = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -66,30 +76,39 @@ function Layout() {
               placeholder="Search..."
               variant="outlined"
               size="small"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               sx={{
-                width:'320px',
-                backgroundColor: 'white', // White background
-                borderRadius: 1, // Rounded corners
+                width: '320px',
+                backgroundColor: 'white',
+                borderRadius: 1,
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    borderColor: 'lightgray', // Light gray border
+                    borderColor: 'lightgray',
                   },
                   '&:hover fieldset': {
-                    borderColor: 'gray', // Darker gray on hover
+                    borderColor: 'gray',
                   },
                 },
               }}
               slotProps={{
-                textFieldRoot: {
+                input: {
                   startAdornment: (
-                    <SearchIcon sx={{ color: 'action.active', mr: 1 }} />
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
                   ),
                 },
               }}
-            />
-            <Button variant="contained" color="primary">
+              />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSearch}
+            >
               Search
             </Button>
+
           </Box>
           <Box>
             {isLoggedIn === false && <Button color="inherit" onClick={clickLogIn}>LogIn</Button>}  
@@ -147,8 +166,16 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer' }}
           >
-              <Link to="/component2" className="text-left p-2 hover:bg-gray-700 rounded-md">
-                <VideoLibrary /> Menu 2
+              <Link to="/videosearch" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <SearchIcon /> Video Search
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/videopopularity" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <VideoLibrary /> Video Popular
               </Link>
           </Typography>
           <Typography
@@ -230,7 +257,8 @@ function Layout() {
               <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/home" element={<Home />} />
               <Route path="/component1" element={<Component1 />} />
-              <Route path="/component2" element={<Component2 />} />
+              <Route path="/videosearch" element={<VideoSearch />} />
+              <Route path="/videopopularity" element={<VideoPopularity />} />
               <Route path="/newarticle" element={<NewArticle />} />
               <Route path="/newvideo" element={<NewVideo />} />
               <Route path="/newchannel" element={<NewChannel />} /> 
