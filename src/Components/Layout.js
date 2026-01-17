@@ -11,11 +11,12 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Home from './Home';
 import Component1 from './Component1';
 import VideoSearch from './VideoSearch.js';
-import VideoPopularity from './VideoPopularity.js';    
+import MyVideos from './MyVideos.js';
+import VideoPopular from './VideoPopular.js';    
 import NewArticle from './NewArticle.js';
 import NewVideo from './NewVideo.js';
 import NewChannel from './NewChannel.js';
-import ManageChannel from './ManageChannel.js';
+import MyChannels from './MyChannels.js';
 import NewComment from './NewComment.js';
 import Profile from './Profile.js';
 import Groups from './Groups.js';
@@ -174,7 +175,15 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer' }}
           >
-              <Link to="/videopopularity" className="text-left p-2 hover:bg-gray-700 rounded-md">
+              <Link to="/myvideos" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <VideoLibrary /> My Videos
+              </Link>
+          </Typography>          
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
+              <Link to="/videopopular" className="text-left p-2 hover:bg-gray-700 rounded-md">
                 <VideoLibrary /> Video Popular
               </Link>
           </Typography>
@@ -206,8 +215,8 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer' }}
           >
-              <Link to="/managechannel" className="text-left p-2 hover:bg-gray-700 rounded-md">
-                <LiveTv />Manage Channel
+              <Link to="/mychannels" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <LiveTv />My Channels
               </Link>
           </Typography>
           <Typography
@@ -257,12 +266,13 @@ function Layout() {
               <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/home" element={<Home />} />
               <Route path="/component1" element={<Component1 />} />
+              <Route path="/myvideos" element={<MyVideos />} />
               <Route path="/videosearch" element={<VideoSearch />} />
-              <Route path="/videopopularity" element={<VideoPopularity />} />
+              <Route path="/videopopular" element={<VideoPopular />} />
               <Route path="/newarticle" element={<NewArticle />} />
               <Route path="/newvideo" element={<NewVideo />} />
               <Route path="/newchannel" element={<NewChannel />} /> 
-              <Route path="/managechannel" element={<ManageChannel />} />              
+              <Route path="/mychannels" element={<MyChannels />} />              
               <Route path="/newcomment" element={<NewComment />} />                          
               <Route path="/profile" element={<Profile />} />
               <Route path="/groups" element={<Groups />} />              
