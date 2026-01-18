@@ -1,8 +1,7 @@
 // NewArticle.js
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, Box, LinearProgress, Typography} from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { VIDEO_API_END_POINT } from '../config/constants.js';
 
 function NewVideo() {
@@ -29,12 +28,17 @@ function NewVideo() {
     console.log("Form Data:", formData);
     try {
       if (!file) return;
-      formData.append('file', file);
+
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('description', formData.description);
+      data.append('tags', formData.tags);           
+      data.append('file', file);
 
       const accessToken = localStorage.getItem('accessToken');
       const response = await axios.post(
         VIDEO_API_END_POINT, 
-        formData,
+        data,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`, // Token in header
@@ -81,40 +85,64 @@ function NewVideo() {
         onChange={handleChange}
         margin="normal"
       />
-      <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography variant="h6">Upload Your File</Typography>
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        {/* Hidden file input */}
         <input
           type="file"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
           id="file-input"
+          hidden
+          onChange={handleFileChange}
         />
+
+        {/* File chooser button */}
         <label htmlFor="file-input">
           <Button
             variant="contained"
-            color="primary"
             component="span"
-            startIcon={<CloudUploadIcon />}
+            sx={{ mt: 2 }}
           >
             Choose File
           </Button>
         </label>
-        {file && <Typography>{file.name}</Typography>}
+
+        {/* Selected file name */}
+        {file && (
+          <Typography sx={{ mt: 2 }}>
+            {file.name}
+          </Typography>
+        )}
+
+        {/* Upload progress */}
         {uploadProgress > 0 && (
-          <Box sx={{ width: '100%', mt: 2 }}>
-            <LinearProgress variant="determinate" value={uploadProgress} />
-            <Typography>{uploadProgress}%</Typography>
+          <Box sx={{ mt: 4 }}>
+            <LinearProgress
+              variant="determinate"
+              value={uploadProgress}
+            />
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 1 }}
+            >
+              {uploadProgress}%
+            </Typography>
           </Box>
         )}
       </Box>
-      <Button 
-       type="submit"
-       color="primary"
-       variant="contained"
-       disabled={!file}       
-       sx={{ mt: 3 }}>
-        Submit
-      </Button>
+
+      <Box sx={{ textAlign: 'center', mt: 6 }}>
+        <Button
+          type="submit"
+          id="submitBtn"
+          name="submitBtn"
+          variant="contained"
+          color="success"
+          disabled={!file}
+          sx={{ px: 4, py: 1.5 }}
+        >
+          Submit
+        </Button>
+      </Box>
     </Box>
   );
 }
