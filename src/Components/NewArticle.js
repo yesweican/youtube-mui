@@ -27,8 +27,7 @@ function NewArticle() {
 
     const data = new FormData();
     data.append('title', formData.title);
-    data.append('description', formData.description);
-    data.append('tags', formData.tags);           
+    data.append('details', formData.details);
     data.append('file', file);
 
     try {

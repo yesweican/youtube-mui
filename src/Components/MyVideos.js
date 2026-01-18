@@ -79,12 +79,13 @@ function MyVideos() {
         {videos.map((video) => (
           <Grid item xs={12} sm={6} md={4} key={video._id}>
             <Card sx={{ height: '100%' }}>
-              {video.alterURL && (
+              {video.videoURL && (
                 <CardMedia
-                  component="img"
-                  height="160"
-                  image={video.alterURL}
-                  alt={video.title}
+                  component="video"
+                  src={video.videoURL}   // ✅ src, not image
+                  controls               // ✅ enable playback
+                  preload="metadata"
+                  sx={{ height: 160 }}
                 />
               )}
 
@@ -119,6 +120,7 @@ function MyVideos() {
                 )}
               </CardContent>
             </Card>
+
           </Grid>
         ))}
       </Grid>
