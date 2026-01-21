@@ -14,6 +14,7 @@ import VideoSearch from './VideoSearch.js';
 import MyVideos from './MyVideos.js';
 import VideoPopular from './VideoPopular.js';    
 import NewArticle from './NewArticle.js';
+import MyArticles from './MyArticles.js';
 import NewVideo from './NewVideo.js';
 import NewChannel from './NewChannel.js';
 import MyChannels from './MyChannels.js';
@@ -191,6 +192,14 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer' }}
           >
+              <Link to="/newvideo" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <MovieCreation />New Video
+              </Link>
+          </Typography>
+          <Typography
+              variant="h6"
+              sx={{ cursor: 'pointer' }}
+          >
               <Link to="/newarticle" className="text-left p-2 hover:bg-gray-700 rounded-md">
                 <PostAdd />New Article
               </Link>
@@ -199,8 +208,8 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer' }}
           >
-              <Link to="/newvideo" className="text-left p-2 hover:bg-gray-700 rounded-md">
-                <MovieCreation />New Video
+              <Link to="/myarticles" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <PostAdd />My Articles
               </Link>
           </Typography>
           <Typography
@@ -269,8 +278,9 @@ function Layout() {
               <Route path="/myvideos" element={<MyVideos />} />
               <Route path="/videosearch" element={<VideoSearch />} />
               <Route path="/videopopular" element={<VideoPopular />} />
-              <Route path="/newarticle" element={<NewArticle />} />
               <Route path="/newvideo" element={<NewVideo />} />
+              <Route path="/newarticle" element={<NewArticle />} />
+              <Route path="/myarticles" element={<MyArticles />} />
               <Route path="/newchannel" element={<NewChannel />} /> 
               <Route path="/mychannels" element={<MyChannels />} />              
               <Route path="/newcomment" element={<NewComment />} />                          
