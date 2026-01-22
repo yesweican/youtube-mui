@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Typography,
   Card,
   CardContent,
-  CardMedia,
   CircularProgress,
   Alert,
   Grid
@@ -77,49 +77,33 @@ function MyChannels() {
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {channels.map((channel) => (
-          <Grid item xs={12} sm={6} md={4} key={channel._id}>
-            <Card sx={{ height: '100%' }}>
-              {channel.alterURL && (
-                <CardMedia
-                  component="img"
-                  height="160"
-                  image={channel.alterURL}
-                  alt={channel.title}
-                />
-              )}
+        <Grid item xs={12} key={channel._id}>
+          <Card
+            component={RouterLink}
+            to={`/channels/${channel._id}`}
+            sx={{
+              textDecoration: "none",
+              color: "inherit",
+              height: "100%",
+              transition: "box-shadow 0.2s ease",
+              "&:hover": {
+                boxShadow: 6
+              }
+            }}
+          >
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                {channel.name}
+              </Typography>
 
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  {channel.title}
+              {channel.description && (
+                <Typography variant="body2" color="text.secondary">
+                  {channel.description}
                 </Typography>
-
-                {channel.description && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    {channel.description}
-                  </Typography>
-                )}
-
-                {channel.channelId?.name && (
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: 'block', mt: 1 }}
-                  >
-                    Channel: {channel.channelId.name}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
         ))}
       </Grid>
     </Box>
