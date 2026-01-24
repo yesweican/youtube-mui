@@ -1,12 +1,46 @@
 // NewArticle.js
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, LinearProgress, Typography} from '@mui/material';
-import { VIDEO_API_END_POINT } from '../config/constants.js';
+import { 
+  TextField, 
+  Button, 
+  Box, 
+  LinearProgress, 
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
+} from '@mui/material';
+import { VIDEO_API_END_POINT, CHANNEL_API_END_POINT } from '../config/constants.js';
 
 function NewVideo() {
+  const [channels, setChannels] = useState([]);
+  const [loadingChannels, setLoadingChannels] = useState(true);
+
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+
+        const res = await axios.get(CHANNEL_API_END_POINT, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+
+        setChannels(res.data.results);
+      } catch (err) {
+        console.error('Failed to load channels', err);
+      } finally {
+        setLoadingChannels(false);
+      }
+    };
+    fetchChannels();
+  }, []);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -15,7 +49,8 @@ function NewVideo() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    tags:''
+    tags:'',
+    channelId: ''
   });
 
   const handleChange = (e) => {
@@ -32,7 +67,8 @@ function NewVideo() {
       const data = new FormData();
       data.append('title', formData.title);
       data.append('description', formData.description);
-      data.append('tags', formData.tags);           
+      data.append('tags', formData.tags);
+      data.append('channelId', formData.channelId);           
       data.append('file', file);
 
       const accessToken = localStorage.getItem('accessToken');
@@ -129,7 +165,31 @@ function NewVideo() {
           </Box>
         )}
       </Box>
+      <Box sx={{ flex: 1, minWidth: 300 }}>
+        <FormControl fullWidth size="small" disabled={loadingChannels}>
+          <InputLabel id="channel-select-label">
+            Channel
+          </InputLabel>
 
+          <Select
+            labelId="channel-select-label"
+            name="channelId"
+            value={formData.channelId}
+            label="Channel"
+            onChange={handleChange}
+          >
+            <MenuItem value="">
+              <em>Select a channel</em>
+            </MenuItem>
+
+            {channels.map(channel => (
+              <MenuItem key={channel._id} value={channel._id}>
+                {channel.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
       <Box sx={{ textAlign: 'center', mt: 6 }}>
         <Button
           type="submit"
