@@ -84,7 +84,7 @@ function MyVideos() {
             sx={{ height: '100%' }}
             key={video._id}
             component={RouterLink}
-            to={`/video/${video._id}`}
+            to={`/videoedit/${video._id}`}
             >
               {video.videoURL && (
                 <CardMedia

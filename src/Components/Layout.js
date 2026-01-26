@@ -24,6 +24,8 @@ import Groups from './Groups.js';
 import Settings from './Settings.js';
 import RegistrationPage from './RegistrationPage';
 import Login from './Login';
+import VideoDisplay from './VideoDisplay.js'; 
+import VideoEdit from './VideoEdit.js'; 
 import Error404 from './Error404.js';
 const drawerWidthExpanded = 260;
 const drawerWidthCollapsed = 120;
@@ -283,7 +285,9 @@ function Layout() {
               <Route path="/myarticles" element={<MyArticles />} />
               <Route path="/newchannel" element={<NewChannel />} /> 
               <Route path="/mychannels" element={<MyChannels />} />              
-              <Route path="/newcomment" element={<NewComment />} />                          
+              <Route path="/newcomment" element={<NewComment />} />
+              <Route path="/video/:id" element={<VideoDisplay />} />
+              <Route path="/videoedit/:id" element={<VideoEdit />} />                                        
               <Route path="/profile" element={<Profile />} />
               <Route path="/groups" element={<Groups />} />              
               <Route path="/settings" element={<Settings />} />

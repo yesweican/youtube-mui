@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom';
+import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   Box,
@@ -82,7 +82,12 @@ function VideoSearch() {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {videos.map((video) => (
           <Grid item xs={12} sm={6} md={4} key={video._id}>
-            <Card sx={{ height: '100%' }}>
+            <Card 
+            sx={{ height: '100%' }}
+            key={video._id}
+            component={RouterLink}
+            to={`/video/${video._id}`}
+            >
               {video.videoURL && (
                 <CardMedia
                   component="video"
