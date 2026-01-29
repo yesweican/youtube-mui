@@ -91,7 +91,7 @@ function VideoEdit() {
       setError(null);
 
       const res = await fetch(`${VIDEO_API_END_POINT}/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
