@@ -80,7 +80,7 @@ function MyChannels() {
         <Grid item xs={12} key={channel._id}>
           <Card
             component={RouterLink}
-            to={`/channels/${channel._id}`}
+            to={`/channeledit/${channel._id}`}
             sx={{
               textDecoration: "none",
               color: "inherit",
