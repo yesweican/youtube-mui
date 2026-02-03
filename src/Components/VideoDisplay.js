@@ -6,10 +6,12 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Alert
+  Alert,
+  Button,
+  Stack
 } from "@mui/material";
 
-import { VIDEO_API_END_POINT } from "../config/constants";
+import { SUBSCRIPTION_API_END_POINT, VIDEO_API_END_POINT } from "../config/constants";
 
 function VideoDisplay() {
   const { id } = useParams();
@@ -17,6 +19,10 @@ function VideoDisplay() {
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [subscribing, setSubscribing] = useState(false);
+
+  const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -31,6 +37,7 @@ function VideoDisplay() {
         }
 
         const data = await res.json();
+        console.log(data);
         setVideo(data);
       } catch (err) {
         setError(err.message);
@@ -41,6 +48,24 @@ function VideoDisplay() {
 
     fetchVideo();
   }, [id]);
+
+  const handleSubscribe = async () => {
+    try {
+      setSubscribing(true);
+
+      await fetch(`${SUBSCRIPTION_API_END_POINT}/${video.channelId._id}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Subscribed to channel:", video.channelId);
+      alert("Subscribed successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to subscribe");
+    } finally {
+      setSubscribing(false);
+    }
+  }; 
 
   if (loading) {
     return (
@@ -91,12 +116,27 @@ function VideoDisplay() {
           )}
 
           {video.channelId && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 1 }}
             >
-              Channel: {video.channelId.name || video.channelId}
-            </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Channel: {video.channelId.name || video.channelId._id}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubscribe}
+                disabled={subscribing}
+              >
+                {subscribing ? "Subscribing..." : "Subscribe"}
+              </Button>
+            </Stack>            
           )}
         </CardContent>
       </Card>
