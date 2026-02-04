@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 // Import your content components
 import Home from './Home';
-import Component1 from './Component1';
+import SubscriptionVideos from './SubscriptionVideos.js';
 import ChannelDisplay from './ChannelDisplay.js'; 
 import ChannelEdit from './ChannelEdit.js'; 
 import VideoSearch from './VideoSearch.js';
@@ -164,8 +164,8 @@ function Layout() {
               variant="h6"
               sx={{ cursor: 'pointer', mb: 1 }}
           >
-              <Link to="/component1" className="text-left p-2 hover:bg-gray-700 rounded-md">
-                <LibraryBooks /> Menu 1
+              <Link to="/subsvideos" className="text-left p-2 hover:bg-gray-700 rounded-md">
+                <LibraryBooks /> Subscription Videos
               </Link>
           </Typography>
           <Typography
@@ -278,8 +278,8 @@ function Layout() {
               {/* Default route that redirects to /component1 */}
               <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/component1" element={<Component1 />} />
-               <Route path="/channel/:id" element={<ChannelDisplay />} />
+              <Route path="/subsvideos" element={<SubscriptionVideos />} />
+              <Route path="/channel/:id" element={<ChannelDisplay />} />
               <Route path="/channeledit/:id" element={<ChannelEdit />} />               
               <Route path="/myvideos" element={<MyVideos />} />
               <Route path="/videosearch" element={<VideoSearch />} />
