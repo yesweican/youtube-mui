@@ -12,6 +12,7 @@ import Home from './Home';
 import SubscriptionVideos from './SubscriptionVideos.js';
 import ChannelDisplay from './ChannelDisplay.js'; 
 import ChannelEdit from './ChannelEdit.js'; 
+import ChannelSubscribers from './ChannelSubscribers.js'; 
 import VideoSearch from './VideoSearch.js';
 import MyVideos from './MyVideos.js';
 import VideoPopular from './VideoPopular.js';    
@@ -280,7 +281,8 @@ function Layout() {
               <Route path="/home" element={<Home />} />
               <Route path="/subsvideos" element={<SubscriptionVideos />} />
               <Route path="/channel/:id" element={<ChannelDisplay />} />
-              <Route path="/channeledit/:id" element={<ChannelEdit />} />               
+              <Route path="/channeledit/:id" element={<ChannelEdit />} />
+              <Route path="/channelsubscribers/:id" element={<ChannelSubscribers />} />
               <Route path="/myvideos" element={<MyVideos />} />
               <Route path="/videosearch" element={<VideoSearch />} />
               <Route path="/videopopular" element={<VideoPopular />} />
