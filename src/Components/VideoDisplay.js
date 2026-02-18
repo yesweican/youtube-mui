@@ -8,23 +8,35 @@ import {
   CircularProgress,
   Alert,
   Button,
-  Stack
+  Stack,
+  TextField,
+  Divider
 } from "@mui/material";
 
-import { SUBSCRIPTION_API_END_POINT, VIDEO_API_END_POINT } from "../config/constants";
+import { SUBSCRIPTION_API_END_POINT, 
+  VIDEO_API_END_POINT,
+  VIDEO_COMMENT_API_END_POINT,
+  COMMENT_API_END_POINT 
+} from "../config/constants";
 
 function VideoDisplay() {
   const { id } = useParams();
 
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [postingComment, setPostingComment] = useState(false);
 
+  const [error, setError] = useState(null);
   const [subscribing, setSubscribing] = useState(false);
 
   const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
+    if (!id) return;
+
     const fetchVideo = async () => {
       try {
         setLoading(true);
@@ -47,6 +59,22 @@ function VideoDisplay() {
     };
 
     fetchVideo();
+
+
+    const fetchComments = async () => {
+    try {
+      setCommentsLoading(true);
+      const res = await fetch(`${VIDEO_COMMENT_API_END_POINT}/${id}`);
+      const data = await res.json();
+      setComments(data.results ?? data);
+    } catch (err) {
+      console.error("Failed to load comments", err);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  fetchComments();
   }, [id]);
 
   const handleSubscribe = async () => {
@@ -66,6 +94,42 @@ function VideoDisplay() {
       setSubscribing(false);
     }
   }; 
+
+  const handleAddComment = async () => {
+  if (!commentText.trim()) return;
+
+  try {
+    setPostingComment(true);
+
+    const res = await fetch(COMMENT_API_END_POINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        video_id: id,
+        details: commentText
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to post comment");
+    }
+
+    setCommentText("");
+
+    // Refresh comments
+    const updated = await fetch(`${VIDEO_COMMENT_API_END_POINT}/${id}`);
+    const data = await updated.json();
+    setComments(data.results ?? data);
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add comment");
+  } finally {
+    setPostingComment(false);
+  }
+};
 
   if (loading) {
     return (
@@ -140,6 +204,62 @@ function VideoDisplay() {
           )}
         </CardContent>
       </Card>
+
+      {/* Comments Section */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Comments
+        </Typography>
+
+        {/* Add Comment */}
+        {token ? (
+          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              multiline
+              minRows={2}
+              placeholder="Add a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              onClick={handleAddComment}
+              disabled={postingComment}
+            >
+              Post
+            </Button>
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Sign in to add a comment
+          </Typography>
+        )}
+
+        <Divider sx={{ mb: 2 }} />
+
+        {/* Comment List */}
+        {commentsLoading ? (
+          <CircularProgress size={24} />
+        ) : comments.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            No comments yet
+          </Typography>
+        ) : (
+          <Stack spacing={2}>
+            {comments.map((comment) => (
+              <Box key={comment._id}>
+                <Typography variant="subtitle2">
+                  {comment.creator?.username || "User"}
+                </Typography>
+                <Typography variant="body2">
+                  {comment.details}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
     </Box>
   );
 }
