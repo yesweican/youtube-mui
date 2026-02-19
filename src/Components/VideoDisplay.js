@@ -13,6 +13,8 @@ import {
   Divider
 } from "@mui/material";
 
+import { Link as RouterLink } from "react-router-dom";
+
 import { SUBSCRIPTION_API_END_POINT, 
   VIDEO_API_END_POINT,
   VIDEO_COMMENT_API_END_POINT,
@@ -186,12 +188,21 @@ function VideoDisplay() {
               alignItems="center"
               sx={{ mb: 1 }}
             >
-              <Typography
-                variant="body2"
-                color="text.secondary"
+              <Card
+              component={RouterLink}
+              to={`/channel/${video.channelId._id}`}
+              sx={{
+                textDecoration: "none",
+                color: "inherit",
+                height: "100%",
+                transition: "box-shadow 0.2s ease",
+                "&:hover": {
+                  boxShadow: 6
+                }
+              }}
               >
                 Channel: {video.channelId.name || video.channelId._id}
-              </Typography>
+              </Card>
               <Button
                 variant="contained"
                 color="primary"

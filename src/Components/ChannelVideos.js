@@ -6,17 +6,18 @@ import {
   Typography,
   Card,
   CardContent,
+  CardMedia,
   CircularProgress,
   Alert,
   Grid
 } from '@mui/material';
 
-import { CHANNEL_SUBSCRIBERS_API_END_POINT } from '../config/constants.js';
+import { CHANNEL_VIDEOS_API_END_POINT } from '../config/constants.js';
 
-function ChannelSubscribers() {
+function ChannelVideos() {
   const { id } = useParams();
 
-  const [subscribers, setSubscribers] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -29,9 +30,9 @@ function ChannelSubscribers() {
       try {
         const token = localStorage.getItem("accessToken");
 
-        console.log("Fetching subscribers with token:", token);
+        console.log("Fetching videos with token:", token);
 
-        const res = await fetch(`${CHANNEL_SUBSCRIBERS_API_END_POINT}/${id}`, {
+        const res = await fetch(`${CHANNEL_VIDEOS_API_END_POINT}/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -43,7 +44,7 @@ function ChannelSubscribers() {
 
         const data = await res.json();
         console.log(data);
-        setSubscribers(data.results || []);
+        setVideos(data.results || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -57,7 +58,7 @@ function ChannelSubscribers() {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>
-        Channel Subscribers
+        Channel Videos
       </Typography>
 
       {loading && (
@@ -72,18 +73,20 @@ function ChannelSubscribers() {
         </Alert>
       )}
 
-      {!loading && !error && subscribers.length === 0 && (
+      {!loading && !error && videos.length === 0 && (
         <Typography variant="body1" sx={{ mt: 2 }}>
-          No subscribers found.
+          No videos found.
         </Typography>
       )}
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        {subscribers.map((subscriber) => (
-        <Grid item xs={12} key={subscriber._id}>
+        {videos.map((video) => (
+        <Grid item xs={12} key={video._id}>
+
+
           <Card
             component={RouterLink}
-            to={`/users/${subscriber._id}`}
+            to={`/video/${video._id}`}
             sx={{
               textDecoration: "none",
               color: "inherit",
@@ -94,14 +97,24 @@ function ChannelSubscribers() {
               }
             }}
           >
+            {video.videoURL && (
+                <CardMedia
+                  component="video"
+                  src={video.videoURL}   // ✅ src, not image
+                  controls               // ✅ enable playback
+                  preload="metadata"
+                  sx={{ height: 160 }}
+                />
+            )}
+
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                {subscriber.fullname}
+                {video.title}
               </Typography>
 
-              {subscriber.email && (
+              {video.description && (
                 <Typography variant="body2" color="text.secondary">
-                  {subscriber.email}
+                  {video.description}
                 </Typography>
               )}
             </CardContent>
@@ -113,4 +126,4 @@ function ChannelSubscribers() {
   );
 }
 
-export default ChannelSubscribers;
+export default ChannelVideos;

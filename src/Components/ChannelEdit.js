@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 
 import { CHANNEL_API_END_POINT } from "../config/constants";
+import ChannelSubscribers from "./ChannelSubscribers";
 
 function ChannelEdit() {
   const { id } = useParams();
@@ -174,6 +175,8 @@ function ChannelEdit() {
           {saving ? "Saving..." : "Save Changes"}
         </Button>
       </Box>
+
+      <ChannelSubscribers />
     </Box>
   );
 }

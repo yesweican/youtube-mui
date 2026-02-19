@@ -10,6 +10,7 @@ import {
   Button,
   Stack
 } from "@mui/material";
+import ChannelVideos from "./ChannelVideos";
 
 import { SUBSCRIPTION_API_END_POINT, CHANNEL_API_END_POINT } from "../config/constants";
 
@@ -129,6 +130,8 @@ function ChannelDisplay() {
           )}
         </CardContent>
       </Card>
+
+      <ChannelVideos />
     </Box>
   );
 }
