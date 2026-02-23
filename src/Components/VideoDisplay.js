@@ -18,6 +18,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { SUBSCRIPTION_API_END_POINT, 
   VIDEO_API_END_POINT,
   VIDEO_COMMENT_API_END_POINT,
+  VIDEOLIKE_API_END_POINT,
   COMMENT_API_END_POINT 
 } from "../config/constants";
 
@@ -30,6 +31,10 @@ function VideoDisplay() {
   const [commentText, setCommentText] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [liking, setLiking] = useState(false);
+
 
   const [error, setError] = useState(null);
   const [subscribing, setSubscribing] = useState(false);
@@ -64,20 +69,49 @@ function VideoDisplay() {
 
 
     const fetchComments = async () => {
-    try {
-      setCommentsLoading(true);
-      const res = await fetch(`${VIDEO_COMMENT_API_END_POINT}/${id}`);
-      const data = await res.json();
-      setComments(data.results ?? data);
-    } catch (err) {
-      console.error("Failed to load comments", err);
-    } finally {
-      setCommentsLoading(false);
-    }
-  };
+      try {
+        setCommentsLoading(true);
+        const res = await fetch(`${VIDEO_COMMENT_API_END_POINT}/${id}`);
+        const data = await res.json();
+        setComments(data.results ?? data);
+      } catch (err) {
+        console.error("Failed to load comments", err);
+      } finally {
+        setCommentsLoading(false);
+      }
+    };
 
-  fetchComments();
-  }, [id]);
+    fetchComments();
+
+    const fetchLikes = async () => {
+      try {
+        const countRes = await fetch(
+          `${VIDEOLIKE_API_END_POINT}/count/${id}`
+        );
+
+        const countData = await countRes.json();
+
+        setLikeCount(countData.count ?? 0);
+
+        if (token) {
+          const checkRes = await fetch(
+            `${VIDEOLIKE_API_END_POINT}/check/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
+          );
+          const checkData = await checkRes.json();
+          setLiked(checkData.liked === true);
+        }
+      } catch (err) {
+        console.error("Failed to load likes", err);
+      }
+    };
+
+    fetchLikes();  
+  }, [id, token]);
 
   const handleSubscribe = async () => {
     try {
@@ -97,41 +131,78 @@ function VideoDisplay() {
     }
   }; 
 
-  const handleAddComment = async () => {
-  if (!commentText.trim()) return;
-
-  try {
-    setPostingComment(true);
-
-    const res = await fetch(COMMENT_API_END_POINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        video_id: id,
-        details: commentText
-      })
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to post comment");
+  const handleLikeToggle = async () => {
+    if (!token) {
+      alert("Sign in to like videos");
+      return;
     }
 
-    setCommentText("");
+    try {
+      setLiking(true);
 
-    // Refresh comments
-    const updated = await fetch(`${VIDEO_COMMENT_API_END_POINT}/${id}`);
-    const data = await updated.json();
-    setComments(data.results ?? data);
-  } catch (err) {
-    console.error(err);
-    alert("Failed to add comment");
-  } finally {
-    setPostingComment(false);
-  }
-};
+      const res = await fetch(
+        `${VIDEOLIKE_API_END_POINT}/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to toggle like");
+      }
+
+      const data = await res.json();
+
+      setLiked(data.liked);
+      setLikeCount(prev =>
+        data.liked ? prev + 1 : prev - 1
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to like video");
+    } finally {
+      setLiking(false);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      setPostingComment(true);
+
+      const res = await fetch(COMMENT_API_END_POINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          video_id: id,
+          details: commentText
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to post comment");
+      }
+
+      setCommentText("");
+
+      // Refresh comments
+      const updated = await fetch(`${VIDEO_COMMENT_API_END_POINT}/${id}`);
+      const data = await updated.json();
+      setComments(data.results ?? data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add comment");
+    } finally {
+      setPostingComment(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -180,6 +251,25 @@ function VideoDisplay() {
               {video.description}
             </Typography>
           )}
+
+          <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+            <Button
+              variant={liked ? "contained" : "outlined"}
+              color="secondary"
+              onClick={handleLikeToggle}
+              disabled={liking}
+            >
+              {liked ? "Liked" : "Like"}
+            </Button>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ alignSelf: "center" }}
+            >
+              {likeCount} {likeCount === 1 ? "like" : "likes"}
+            </Typography>
+          </Stack>
 
           {video.channelId && (
             <Stack
