@@ -7,42 +7,50 @@ import {
   CardMedia,
   CircularProgress,
   Alert,
-  Grid
+  Grid,
+  Pagination
 } from '@mui/material';
 
 import { Link as RouterLink } from 'react-router-dom';
-
 import { VIDEO_API_END_POINT } from '../config/constants.js';
 
 function MyVideos() {
   const [videos, setVideos] = useState([]);
+  const [page, setPage] = useState(0);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const totalPages = Math.ceil(total / pageSize);
 
-    const fetchVideos = async () => {
+  useEffect(() => {
+    const fetchVideos = async (pageNumber) => {
       setLoading(true);
       setError(null);
 
       try {
         const token = localStorage.getItem("accessToken");
 
-        console.log("Fetching videos with token:", token);
-
-        const res = await fetch(`${VIDEO_API_END_POINT}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${VIDEO_API_END_POINT}?page=${pageNumber}&pageSize=${pageSize}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
-          throw new Error('Failed to fetch My Video results');
+          throw new Error("Failed to fetch My Videos");
         }
 
         const data = await res.json();
         console.log(data);
+
         setVideos(data.results || []);
+        setTotal(data.total || 0);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -50,8 +58,8 @@ function MyVideos() {
       }
     };
 
-    fetchVideos();
-  }, []);
+    fetchVideos(page);
+  }, [page, pageSize]);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -80,17 +88,16 @@ function MyVideos() {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {videos.map((video) => (
           <Grid item xs={12} sm={6} md={4} key={video._id}>
-            <Card 
-            sx={{ height: '100%' }}
-            key={video._id}
-            component={RouterLink}
-            to={`/videoedit/${video._id}`}
+            <Card
+              sx={{ height: '100%' }}
+              component={RouterLink}
+              to={`/videoedit/${video._id}`}
             >
               {video.videoURL && (
                 <CardMedia
                   component="video"
-                  src={video.videoURL}   // ✅ src, not image
-                  controls               // ✅ enable playback
+                  src={video.videoURL}
+                  controls
                   preload="metadata"
                   sx={{ height: 160 }}
                 />
@@ -127,10 +134,20 @@ function MyVideos() {
                 )}
               </CardContent>
             </Card>
-
           </Grid>
         ))}
       </Grid>
+
+      {totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page + 1}
+            onChange={(e, value) => setPage(value - 1)}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 }
