@@ -8,7 +8,8 @@ import {
   CardMedia,
   CircularProgress,
   Alert,
-  Grid
+  Grid,
+  Pagination
 } from '@mui/material';
 
 import { VIDEO_SEARCH_API_END_POINT } from '../config/constants.js';
@@ -21,6 +22,12 @@ function VideoSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [page, setPage] = useState(1); // MUI pagination is 1-based
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
+  const totalPages = Math.ceil(total / pageSize);
+
   useEffect(() => {
     if (!query) return;
 
@@ -30,7 +37,7 @@ function VideoSearch() {
 
       try {
         const response = await fetch(
-          `${VIDEO_SEARCH_API_END_POINT}?q=${encodeURIComponent(query)}`
+          `${VIDEO_SEARCH_API_END_POINT}?q=${encodeURIComponent(query)}&page=${page-1}&pageSize=${pageSize}`
         );
 
         if (!response.ok) {
@@ -38,7 +45,10 @@ function VideoSearch() {
         }
 
         const data = await response.json();
+
         setVideos(data.results || []);
+        setTotal(data.total || 0);
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -47,7 +57,11 @@ function VideoSearch() {
     };
 
     fetchVideos();
-  }, [query]);
+  }, [query, page, pageSize]);
+
+  const handlePageChange = (_, value) => {
+    setPage(value);
+  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -67,39 +81,32 @@ function VideoSearch() {
         </Box>
       )}
 
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error">{error}</Alert>}
 
       {!loading && !error && videos.length === 0 && query && (
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          No videos found.
-        </Typography>
+        <Typography>No videos found.</Typography>
       )}
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {videos.map((video) => (
           <Grid item xs={12} sm={6} md={4} key={video._id}>
-            <Card 
-            sx={{ height: '100%' }}
-            key={video._id}
-            component={RouterLink}
-            to={`/video/${video._id}`}
+            <Card
+              component={RouterLink}
+              to={`/video/${video._id}`}
+              sx={{ height: '100%' }}
             >
               {video.videoURL && (
                 <CardMedia
                   component="video"
-                  src={video.videoURL}   // ✅ src, not image
-                  controls               // ✅ enable playback
+                  src={video.videoURL}
+                  controls
                   preload="metadata"
                   sx={{ height: 160 }}
                 />
               )}
 
               <CardContent>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                <Typography variant="subtitle1" fontWeight={600}>
                   {video.title}
                 </Typography>
 
@@ -118,13 +125,9 @@ function VideoSearch() {
                   </Typography>
                 )}
 
-                {video.channelId?.name && (
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: 'block', mt: 1 }}
-                  >
-                    Channel: {video.channelId.name}
+                {video.creator?.username && (
+                  <Typography variant="caption" color="text.secondary">
+                    {video.creator.username}
                   </Typography>
                 )}
               </CardContent>
@@ -132,6 +135,17 @@ function VideoSearch() {
           </Grid>
         ))}
       </Grid>
+
+      {totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 }

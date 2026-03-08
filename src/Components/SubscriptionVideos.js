@@ -1,4 +1,4 @@
-import { Link as RouterLink, useSearchParams } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   Box,
@@ -8,7 +8,8 @@ import {
   CardMedia,
   CircularProgress,
   Alert,
-  Grid
+  Grid,
+  Pagination
 } from '@mui/material';
 
 import { SUBS_VIDEOS_API_END_POINT } from '../config/constants.js';
@@ -18,6 +19,12 @@ function SubscriptionVideos() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
+  const totalPages = Math.ceil(total / pageSize);
 
   useEffect(() => {
 
@@ -29,7 +36,7 @@ function SubscriptionVideos() {
         const token = localStorage.getItem("accessToken");
 
         const response = await fetch(
-          `${SUBS_VIDEOS_API_END_POINT}`, 
+          `${SUBS_VIDEOS_API_END_POINT}?page=${page-1}&pageSize=${pageSize}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -38,11 +45,14 @@ function SubscriptionVideos() {
         );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch search results');
+          throw new Error('Failed to fetch subscription videos');
         }
 
         const data = await response.json();
+
         setVideos(data.results || []);
+        setTotal(data.total || 0);
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -51,7 +61,12 @@ function SubscriptionVideos() {
     };
 
     fetchVideos();
-  }, []);
+
+  }, [page, pageSize]);
+
+  const handlePageChange = (_, value) => {
+    setPage(value);
+  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -65,39 +80,32 @@ function SubscriptionVideos() {
         </Box>
       )}
 
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error">{error}</Alert>}
 
       {!loading && !error && videos.length === 0 && (
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          No videos found.
-        </Typography>
+        <Typography>No videos found.</Typography>
       )}
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {videos.map((video) => (
           <Grid item xs={12} sm={6} md={4} key={video._id}>
-            <Card 
-            sx={{ height: '100%' }}
-            key={video._id}
-            component={RouterLink}
-            to={`/video/${video._id}`}
+            <Card
+              component={RouterLink}
+              to={`/video/${video._id}`}
+              sx={{ height: '100%' }}
             >
               {video.videoURL && (
                 <CardMedia
                   component="video"
-                  src={video.videoURL}   // ✅ src, not image
-                  controls               // ✅ enable playback
+                  src={video.videoURL}
+                  controls
                   preload="metadata"
                   sx={{ height: 160 }}
                 />
               )}
 
               <CardContent>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                <Typography variant="subtitle1" fontWeight={600}>
                   {video.title}
                 </Typography>
 
@@ -117,11 +125,7 @@ function SubscriptionVideos() {
                 )}
 
                 {video.channelId?.name && (
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: 'block', mt: 1 }}
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     Channel: {video.channelId.name}
                   </Typography>
                 )}
@@ -130,6 +134,17 @@ function SubscriptionVideos() {
           </Grid>
         ))}
       </Grid>
+
+      {totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 }
