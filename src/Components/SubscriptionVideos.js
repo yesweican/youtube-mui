@@ -1,5 +1,5 @@
 import { Link as RouterLink } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -8,8 +8,7 @@ import {
   CardMedia,
   CircularProgress,
   Alert,
-  Grid,
-  Pagination
+  Grid
 } from '@mui/material';
 
 import { SUBS_VIDEOS_API_END_POINT } from '../config/constants.js';
@@ -20,65 +19,102 @@ function SubscriptionVideos() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0); // ✅ 0-based
+  const [hasMore, setHasMore] = useState(true);
 
-  const totalPages = Math.ceil(total / pageSize);
+  const pageSize = 10;
 
-  useEffect(() => {
+  const observerRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const isFetchingRef = useRef(false);
 
-    const fetchVideos = async () => {
+  const fetchVideos = useCallback(async (pageToFetch) => {
+    if (isFetchingRef.current) return;
+
+    isFetchingRef.current = true;
+
+    try {
       setLoading(true);
       setError(null);
 
-      try {
-        const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken");
 
-        const response = await fetch(
-          `${SUBS_VIDEOS_API_END_POINT}?page=${page-1}&pageSize=${pageSize}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch subscription videos');
-        }
-
-        const data = await response.json();
-
-        setVideos(data.results || []);
-        setTotal(data.total || 0);
-
-      } catch (err) {
-        setError(err.message);
-      } finally {
+      if (!token) {
+        setError("Please log in.");
+        isFetchingRef.current = false;
         setLoading(false);
+        return;
       }
-    };
 
-    fetchVideos();
+      const response = await fetch(
+        `${SUBS_VIDEOS_API_END_POINT}?page=${pageToFetch}&pageSize=${pageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
-  }, [page, pageSize]);
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP ${response.status}: ${text}`);
+      }
 
-  const handlePageChange = (_, value) => {
-    setPage(value);
-  };
+      const data = await response.json();
+      const newVideos = data.results || [];
+      const total = data.total || 0;
+
+      // ✅ Deduplication
+      setVideos((prev) => {
+        const existingIds = new Set(prev.map(v => v._id));
+        const filtered = newVideos.filter(v => !existingIds.has(v._id));
+        return [...prev, ...filtered];
+      });
+
+      // ✅ Determine if more data exists
+      setHasMore((pageToFetch + 1) * pageSize < total);
+
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, []);
+
+  // 🔁 Fetch when page changes
+  useEffect(() => {
+    fetchVideos(page);
+  }, [page, fetchVideos]);
+
+  // 👁️ IntersectionObserver (sentinel)
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingRef.current) {
+          setPage(prev => prev + 1);
+        }
+      },
+      {
+        rootMargin: "200px"
+      }
+    );
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [hasMore]);
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>
         Subscription Videos
       </Typography>
-
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
 
       {error && <Alert severity="error">{error}</Alert>}
 
@@ -88,7 +124,7 @@ function SubscriptionVideos() {
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {videos.map((video) => (
-          <Grid item xs={12} sm={6} md={4} key={video._id}>
+          <Grid item xs={12} sm={6} key={video._id}>
             <Card
               component={RouterLink}
               to={`/video/${video._id}`}
@@ -100,7 +136,7 @@ function SubscriptionVideos() {
                   src={video.videoURL}
                   controls
                   preload="metadata"
-                  sx={{ height: 160 }}
+                  sx={{ height: 180 }}
                 />
               )}
 
@@ -135,15 +171,19 @@ function SubscriptionVideos() {
         ))}
       </Grid>
 
-      {totalPages > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-          />
+      {/* 🔻 Sentinel */}
+      <Box ref={sentinelRef} sx={{ height: 40 }} />
+
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <CircularProgress />
         </Box>
+      )}
+
+      {!hasMore && videos.length > 0 && (
+        <Typography align="center" color="text.secondary" sx={{ mt: 3 }}>
+          No more videos
+        </Typography>
       )}
     </Box>
   );
